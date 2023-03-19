@@ -1,60 +1,82 @@
-//let mapWidth = 1500; //px
-//let mapHeight = 404;  //px
-let cellsWide = 300;
-let cellSize;  //px
+// cellSize in pixels
+let cellSize;
+//scene colors
 let sunColor = 'RGB(253, 184, 019)';
 let skyColor = 'RGB(183, 226, 252)';
+let groundColor = 'RGB(212, 123, 74)'
+
+//Main data source for this sketch
 let mapInstance;
+let actualWidth, actualHeight;
+
+//boolean pause flag- start as unpaused.
 let paused = false;
 
 function setup() {
-    frameRate(60)
+    //It is possible to control FPS, p5js default is 60
+    //frameRate(30)
 
-    let actualWidth = windowWidth * 0.92;
-    let actualHeight = windowHeight * 0.92;
+    //How many cells wide this map should be
+    let cellsWide = 300; 
 
-    cellSize = Math.round(actualWidth / cellsWide);
-    mapInstance = new WorldMap(actualWidth, actualHeight * 0.5, cellSize);
+    let mapWidth = windowWidth;
+    let mapHeight = windowHeight;
 
-    mapWidth = mapInstance.mapWidth;
-    mapHeight = mapInstance.mapHeight;
+    cellSize = Math.floor(mapWidth / cellsWide);
+    mapInstance = new WorldMap(mapWidth, mapHeight * 0.5, cellSize);
 
-    createCanvas(mapWidth, mapHeight);
+    actualWidth = mapInstance.mapWidth;
+    actualHeight = mapInstance.mapHeight;
+
+    createCanvas(actualWidth, actualHeight);
 }
 
 function draw() {
 
+    // If paused, return
     if (paused) return;
-    //  Draw gradient sky
-    for (let y = 0; y < height; y += cellSize) {
-        n = map(y, 0, height, 0, 1);
-        let newc = lerpColor(color(sunColor), color(skyColor), n);
-        fill(newc);
-        noStroke();
-        rect(0, y, width, cellSize);
-    }
-    //Draw Ground
-    let y = (mapInstance.rows) * cellSize
-    fill('RGB(212, 123, 74)');
-    noStroke();
-    rect(0, y, mapWidth, cellSize);
-    //Update 1 tick
-    mapInstance.update();
-    //Draw on canvas
-    drawMap();
-}
 
+    //Draw scene
+    drawScene()
+
+    //Update 1 tick on mapInstance.
+    //And draw map on canvas
+    mapInstance.update();
+    drawMap();
+
+    //Add marker texts
+    drawTexts();
+}
+function drawScene(){
+    drawGradientSky()
+    drawGround()
+}
+function drawGradientSky(){
+    //for each height level, map the range of realtive position and world height
+    for (let y = 0; y < actualHeight; y += cellSize) {
+        n = map(y, 0, actualHeight, 0, 1);
+        // Linear interpolate the scene colors based on n (=where is it in this gradient)
+        let newColor = lerpColor(color(sunColor), color(skyColor), n);
+
+        //Draw this light level rectangle in the correct color.
+        fill(newColor);
+        noStroke();
+        rect(0, y, actualWidth, cellSize);
+    }
+}
+function drawGround(){
+    let y = (mapInstance.rows) * cellSize
+    fill(groundColor);
+    noStroke();
+    rect(0, y, actualWidth, cellSize);
+}
 function mouseClicked() {
     paused = !paused;
-    if (paused){
-        textSize(16);
-        fill(0);
-        text(`PAUSED`, 10, 100);
-    }
+    if (paused) drawPausedText();
   }
 
 function drawMap() {
-    //Refrences only
+    //Refrences only for convienience
     let columns = mapInstance.columns;
     let rows = mapInstance.rows;
     let mapCells = mapInstance.mapCells;
@@ -71,11 +93,29 @@ function drawMap() {
         }
     }
 }
+function drawTexts(){
+    textSize(16);
+    fill(0);
+    noStroke();
+    textStyle(NORMAL);
+    text(`Generation: ${mapInstance.worldGeneration}`, 10, 30);
+    text(`Trees: ${mapInstance.activeTrees.length}`, 10, 50);
+    text(`Record Largest Tree: ${mapInstance.largestTree} cells`, 10, 70);
+}
+function drawPausedText(){
+    textSize(16);
+    fill('RGB(255, 00, 00)');
+    noStroke();
+    textStyle(BOLD);
+    text(`⏸ PAUSED`, 10, 100);
+}
 function drawCell(column, row, color) {
     let x = column * cellSize
     let y = (mapInstance.rows - 1 - row) * cellSize
     let a = cellSize;
-    let radius = 1;
+
+    //Radius is for rounded corners
+    let radius = cellSize/Math.PI;
     fill(color.fill);
     stroke(color.stroke);
     strokeWeight(1);
