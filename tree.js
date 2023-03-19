@@ -7,7 +7,7 @@ class Tree {
         this.lifeExpectancy = this.worldMap.lifeExpectancy + deviation;
         this.age = 0;
         this.energy = 200;
-        this.energyCostPerCell = 13;
+        this.energyCostPerCell = 15;
         this.energyForNewCell = 18;
 
         this.cells = [];

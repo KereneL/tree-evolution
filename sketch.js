@@ -1,10 +1,11 @@
 //let mapWidth = 1500; //px
 //let mapHeight = 404;  //px
-let cellsWide = 420;
+let cellsWide = 300;
 let cellSize;  //px
 let sunColor = 'RGB(253, 184, 019)';
 let skyColor = 'RGB(183, 226, 252)';
 let mapInstance;
+let paused = false;
 
 function setup() {
     frameRate(60)
@@ -23,6 +24,7 @@ function setup() {
 
 function draw() {
 
+    if (paused) return;
     //  Draw gradient sky
     for (let y = 0; y < height; y += cellSize) {
         n = map(y, 0, height, 0, 1);
@@ -41,6 +43,15 @@ function draw() {
     //Draw on canvas
     drawMap();
 }
+
+function mouseClicked() {
+    paused = !paused;
+    if (paused){
+        textSize(16);
+        fill(0);
+        text(`PAUSED`, 10, 100);
+    }
+  }
 
 function drawMap() {
     //Refrences only
