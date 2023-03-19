@@ -30,33 +30,28 @@ class Tree {
     }
 
     update() {
-
         // After sketch.worldmapInstance finishes applySunrays(), there's energy to 'collect' in ordinary cells.
         // The energy is not absorbed in seed cells, and is not collected from offshoots.
         // Instead, the energy is accumulated in each offshoot until it has enough to sprout.
         // Excess energy is not distributed;
         //not from the tree's energy not from extra energy in offshoots just before they sprout.
-
-
-        // if this tree is not just a seed anymore,
-        // check if there's enough energy for this tree,
-        // if not, kill() this tree.
-        // If it did not die, advance in age (🎉)
+        let energyCost = this.calcEnergy();
+        this.energy -= energyCost;
 
         // during update, cells are sometimes added to cells[].
         // this causes a feedback loop that executes all possible growth at once,
         // which is to be avoided. A copy of cells[] iterates,
         // while adding new said cells in the original cells[]
         //console.log(this.energy);
-
-        let energyCost = this.calcEnergy();
-        this.energy -= energyCost;
-
         let activeCellsForThisTurn = [...this.cells]
         for (let i = 0; i < activeCellsForThisTurn.length; i++) {
             activeCellsForThisTurn[i].update()
         }
 
+        // if this tree is not just a seed anymore,
+        // check if there's enough energy for this tree,
+        // if not, kill() this tree.
+        // If it did not die, advance in age (🎉)
         if (this.firstCell.stage != 0) {
             if (this.energy <= 0 || this.age >= this.lifeExpectancy) {
                 this.kill()
@@ -73,6 +68,7 @@ class Tree {
             cell.kill(aged)
         })
         // reset cells[] 
+        this.worldMap.largestTree = Math.max(this.worldMap.largestTree, this.cells.length);
         this.cells = [];
 
         this.removeFromActiveTrees();

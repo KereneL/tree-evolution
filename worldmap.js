@@ -19,6 +19,8 @@ class WorldMap {
         this.activeTrees = [];
         this.mapCells;
 
+        this.largestTree = 0;
+
         //Init Map
         this.mapCells = new Array(this.columns);
         for (let arrayColumn = 0; arrayColumn < this.mapCells.length; arrayColumn++) {
@@ -54,6 +56,12 @@ class WorldMap {
 
     update() {
         this.worldAge++;
+        this.worldGeneration = Math.floor(this.worldAge/this.worldGenerationLength);
+        textSize(16);
+        fill(0);
+        text(`Generation: ${this.worldGeneration}`, 10, 30);
+        text(`Trees: ${this.activeTrees.length}`, 10, 50);
+        text(`Record Largest Tree: ${this.largestTree} cells`, 10, 70);
         this.applySunrays();
         this.updateTrees();
         this.checkForNoAction();
